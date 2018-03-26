@@ -20,10 +20,11 @@ public class Parser {
             "(\\W[a-zA-Z-0-9]*\\W)\\s" +
             "(ERROR)\\s" +
             "((\\S?[a-zA-Z]+\\S?)+)\\s-\\s(.+)?" +
-            "((\\n+.+)+(omitted))");
-    private static Pattern patternWarningLog = Pattern.compile("([0-9]*)\\s\\[(.+)\\]\\s(WARN)\\s+((\\.?[a-zA-Z]+)*)\\s-\\s(.+)" +
+            "(.+)?");
+    private static Pattern patternWarningLog = Pattern.compile("^([0-9]*)\\s\\[(.+)\\]\\s(WARN)\\s\\s+((\\.?[a-zA-Z]+)*)\\s-\\s(.+)" +
             "-\\s(.+)");
-    private static ArrayList<Pattern> arrayOfPattern = new ArrayList<>(Arrays.asList(
+    private static ArrayList<Pattern> arrayOfPattern =
+            new ArrayList<>(Arrays.asList(
                     Pattern.compile("^(Jan|Feb|Mar|Apr|May|June|July|Aug|Sept|Oct|Nov|Dec)\\s" +
             "(([0-2]?[1-9])|([3][0,1])|10|20|30),\\s" +
             "([0-9]{4})\\" +
@@ -44,7 +45,7 @@ public class Parser {
             "([0-5][0-9]|60):" +
             "([0-5][0-9]|60)[.]" +
             "([0-9][0-9][0-9]))"),
-                    Pattern.compile("([0-9]*)\\s(\\[.+\\])\\s" +
+                    Pattern.compile("^([0-9]*)\\s(\\[.+\\])\\s" +
                             "(WARN)")));
     private static ArrayList<InfoLog> infoLogs = new ArrayList<>();
     private static ArrayList<ErrorLog> errorLogs = new ArrayList<>();
@@ -52,8 +53,9 @@ public class Parser {
 
     public static void main(String[] args) throws IOException {
         ArrayList<String> data = getData();
-        getWARNING(data);
-        System.out.println(warningLogs);
+        getError(data);
+        getINFO(data);
+        System.out.println(infoLogs);
     }
 
 
@@ -65,8 +67,7 @@ public class Parser {
                         match.group(2),
                         match.group(3),
                         match.group(4),
-                        match.group(6) == null ? "No data about error" : match.group(6),
-                        match.group(7) == null ? "No data about error" : match.group(7)
+                        match.group(6) == null ? "No data about error" : match.group(6)
                 ));
             }
         }
@@ -93,10 +94,10 @@ public class Parser {
             Matcher match = patternWarningLog.matcher(error);
             if (match.matches()) {
                 warningLogs.add(new WarningLog(match.group(1),
-                        match.group(3),
-                        match.group(2),
-                        match.group(4),
-                        match.group(6)
+                        match.group(3)== null ? "No data about error" : match.group(6),
+                        match.group(2)== null ? "No data about error" : match.group(6),
+                        match.group(4) == null ? "No data about error" : match.group(4),
+                        match.group(6) == null ? "No data about error" : match.group(6)
                 ));
             }
         }
